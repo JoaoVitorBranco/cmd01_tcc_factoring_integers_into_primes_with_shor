@@ -132,4 +132,9 @@ class Controller:
         if result is False:
             return ("Não foi possível encontrar os primos", 404)
         
-        return (result, 200)
+        if len(result) == 0:
+            return ("Nenhum primo encontrado", 404)
+
+        primes_set = set(result)  
+        primes_dict = {prime: result.count(prime) for prime in primes_set}
+        return (primes_dict, 200)
