@@ -1,12 +1,11 @@
 from functions.order_finding_interface import OrderFindingInterface
 import math
+from math import gcd
 import random
 from typing import Callable
 
-
-
 class Controller:
-    def __init__(self, order_finding: OrderFindingInterface, n_times_shor: int = 10, ):
+    def __init__(self, order_finding: OrderFindingInterface, n_times_shor: int = 10 ):
         self.order_finding = order_finding
         self.n_times_shor = n_times_shor
 
@@ -23,7 +22,7 @@ class Controller:
         return (False, a) # Tentar novamente o algoritmo
 
       # Testa se 'r' é par
-      if r % 2 == 1:
+      if r % 2 != 0:
         print("'r' não é par")
         return (False, False) # deve trocar o valor de 'a'
       a_r2 = a**(r//2)
@@ -48,7 +47,7 @@ class Controller:
 
       set_N = list(range(2,N))
       a = random.choice(set_N)
-      print(f"Estou na escolha probabilistica. Vou testar o: {a}")
+      print(f"Estou na escolha probabilistica. Vou testar o: a = {a} e N = {N}")
       d = math.gcd(a, N) # calcula o maior divisor comum entre os 2 valores
       if d > 1: # significa que d é um divisor de N
         c = N // d # resultado da operação, que entrará na recursão do algorítmo principal
@@ -57,8 +56,8 @@ class Controller:
       else: # realizando o cálculo da ordem r de a, onde a ^ r = 1 mod N  (order finding problem)
         try:
 
-          print(f"Entrando no order finding problem... rodando {n_times_shor} vezes")
-          for _ in range(n_times_shor):
+          print(f"Entrando no order finding problem... rodando {self.n_times_shor} vezes")
+          for _ in range(self.n_times_shor):
             print(f"\nTentativa: {_ + 1}")
             possible_divisor, possible_new_N = self._run_order_finding(N, a)
             if possible_divisor != False and possible_new_N != False: 
@@ -66,8 +65,11 @@ class Controller:
             elif possible_divisor == False and possible_new_N != False:
               a = possible_new_N
               print(f"Novo valor de 'a': {a}")
+            else:
+              print("'r' não é par, tentando novamente com novo valor de 'a'")
+              break
 
-          print(f"Nenhuma das {n_times_shor} vezes encontrou-se um 'r' válido")
+          print(f"Nenhuma das {self.n_times_shor} vezes encontrou-se um 'r' válido")
           return False
 
         except Exception as err:
