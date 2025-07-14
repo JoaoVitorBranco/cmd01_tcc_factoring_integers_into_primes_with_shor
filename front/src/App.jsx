@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import './App.css';
+import Latex from './Latex';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [numero, setNumero] = useState('');
+  const [resultado, setResultado] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const fatorar = async () => {
+    if (!numero || parseInt(numero) <= 1) {
+      setResultado('\\text{Informe um número maior que 1}');
+      return;
+    }
+    setLoading(true);
+    setResultado('');
+
+    try {
+      const response = await fetch(`http://192.168.0.63:5000/api/factorize?number=${numero}`);
+      const data = await response.json();
+      const fatores = data.fatores;
+      let latex = '';
+      for (const [fator, expoente] of Object.entries(fatores)) {
+        latex += `${fator}^{${expoente}} \\times `;
+      }
+      latex = latex.slice(0, -7); // Remove o último " \\times "
+      setResultado(`\\text{Resultado:}\\quad ${latex}`);
+    } catch (error) {
+      console.error(error);
+      setResultado('\\text{Erro ao consultar o backend}');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="container">
+      <h1>Fatoração de Inteiros</h1>
+      <input
+        type="number"
+        value={numero}
+        onChange={(e) => setNumero(e.target.value)}
+        placeholder="Digite um número inteiro"
+      />
+      <button onClick={fatorar} disabled={loading}>
+        {loading ? 'Calculando...' : 'Fatorar'}
+      </button>
+
+      {loading && <div className="loader"></div>}
+
+      {!loading && resultado && <Latex texString={resultado} />}
+    </div>
+  );
 }
 
-export default App
+export default App;
