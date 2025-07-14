@@ -1,12 +1,17 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from controller import Controller
+from controller_shor import ControllerShor
+from controller_pollard import ControllerPollard
+from controller_fermat import ControllerFermat
 from functions.order_finding_classical import OrderFindingClassical
 from functions.order_finding_shor import OrderFindingShor
 
+
 order_finding = OrderFindingShor()
-controller = Controller(order_finding=order_finding)
+controller = ControllerShor(order_finding=order_finding, n_times_shor=3)
+controller_classical = ControllerPollard()
+controller_fermat = ControllerFermat()
 app = Flask(__name__)
 CORS(app)
 
@@ -17,11 +22,21 @@ def home():
 @app.route('/api/factorize', methods=['GET'])
 def factorize():
     number = request.args.get('number')
+    type_alg = request.args.get('type_alg')
     if not number:
-        return jsonify({"erro": "Parâmetro 'nome' é obrigatório"}), 400
+        return jsonify({"erro": "Parâmetro 'number' é obrigatório"}), 400
     
-    result, status_code = controller(number)
-    
+    if type_alg == None or type_alg == "shor":
+        result, status_code = controller(number)
+    elif type_alg != None and type_alg == "pollard":
+        result, status_code = controller_classical(number)
+    elif type_alg != None and type_alg == "fermat":
+        result, status_code = controller_fermat(number)
+    else:
+        return jsonify({"erro": "Parâmetro 'type_algo' inválido"}), 400
+        
+
+
     if status_code == 200:
         return jsonify({"fatores": result}), status_code
     else:

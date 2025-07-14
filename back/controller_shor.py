@@ -2,9 +2,8 @@ from functions.order_finding_interface import OrderFindingInterface
 import math
 from math import gcd
 import random
-from typing import Callable
 
-class Controller:
+class ControllerShor:
     def __init__(self, order_finding: OrderFindingInterface, n_times_shor: int = 10 ):
         self.order_finding = order_finding
         self.n_times_shor = n_times_shor
