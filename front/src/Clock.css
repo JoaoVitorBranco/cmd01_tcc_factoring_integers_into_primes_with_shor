@@ -1,0 +1,55 @@
+.clock-panel {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 240px !important;
+    text-align: center;
+    transition: 0.3s ease;
+  }
+  
+  .clock-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #6c2bd9;
+  }
+  
+  .clock-bigoh {
+    font-size: 1rem;
+    color: #6c2bd9;
+    margin-bottom: 8px;
+  }
+  
+  .clock-circle {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+  }
+  
+  .clock-circle svg {
+    transform: rotate(-90deg);
+  }
+  
+  
+  .clock-circle .clock-percent {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #7e5bef;
+  }
+  
+  .text-success {
+    color: #28a745;
+    margin-top: 10px;
+  }
+  
+  .text-warning {
+    color: #ffc107;
+    margin-top: 10px;
+  }
+  
