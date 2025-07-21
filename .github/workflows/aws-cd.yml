@@ -2,10 +2,7 @@ name: AWS CD
 on:
   push:
     branches:
-      - dev
-      - homolog
-      - prod
-      - aws-migration
+      - main
   workflow_dispatch:
 
 jobs:
