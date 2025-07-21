@@ -32,14 +32,8 @@ jobs:
           node-version: 18.x
       - name: Setting stage and stack name
         run: |
-          if [[ "${{ github.ref_name }}" == "dev" ]]; then
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
             echo "STAGE=dev" >> $GITHUB_ENV
-          elif [[ "${{ github.ref_name }}" == "aws-migration" ]]; then
-            echo "STAGE=dev" >> $GITHUB_ENV
-          elif [[ "${{ github.ref_name }}" == "homolog" ]]; then
-            echo "STAGE=homolog" >> $GITHUB_ENV
-          elif [[ "${{ github.ref_name }}" == "prod" ]]; then
-            echo "STAGE=prod" >> $GITHUB_ENV
           else
             echo "Invalid branch name!" && exit 1
           fi
