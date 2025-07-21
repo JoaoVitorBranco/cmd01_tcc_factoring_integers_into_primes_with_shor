@@ -49,12 +49,10 @@ jobs:
           echo "STACK_NAME=QuantumBrosStackFront${{env.STAGE}}" >> $GITHUB_ENV
       - name: Installing Dependencies
         run: |
-          cd front
           npm install
           npm install -g aws-cdk
       - name: Build and Export
         run: |
-          cd front
           npm run build
         env:
           VITE_STAGE: ${{ env.VITE_STAGE}}
@@ -69,7 +67,7 @@ jobs:
           echo ACM_CERTIFICATE_ARN=${{ secrets.ACM_CERTIFICATE_ARN }} >> $GITHUB_ENV
       - name: Deploy with CDK
         run: |
-          cd front/iac
+          cd iac
           npm install
           cdk synth
           cdk deploy --require-approval never
@@ -91,7 +89,6 @@ jobs:
           aws s3 ls s3://${{env.AWS_BUCKET}} || (echo "Bucket does not exist or is inaccessible" && exit 1)
       - name: Upload to S3
         run: |
-          cd front
           aws s3 cp dist s3://${{env.AWS_BUCKET}}/ --recursive --region ${{ env.AWS_REGION }}
       - name: Clear CDN cache
         run: aws cloudfront create-invalidation --distribution-id ${{env.CLOUD_FRONT_ID}} --paths "/*" --region us-east-1
