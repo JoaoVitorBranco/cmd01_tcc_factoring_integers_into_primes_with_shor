@@ -26,6 +26,10 @@ def factorize():
     if not number:
         return jsonify({"erro": "Parâmetro 'number' é obrigatório"}), 400
     
+    LIMIT_NUMBER  = 60
+    if not number.isdigit() or int(number) < 2 or int(number) > LIMIT_NUMBER:
+        return jsonify({"erro": f"Parâmetro 'number' deve ser um inteiro entre 2 e {LIMIT_NUMBER}"}), 400
+    
     if type_alg == None or type_alg == "shor":
         result, status_code = controller(number)
     elif type_alg != None and type_alg == "pollard":
