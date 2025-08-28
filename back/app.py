@@ -9,7 +9,7 @@ from functions.order_finding_shor import OrderFindingShor
 
 
 order_finding = OrderFindingShor()
-controller = ControllerShor(order_finding=order_finding, n_times_shor=3)
+controller = ControllerShor(order_finding=order_finding, n_times_shor=1)
 controller_classical = ControllerPollard()
 controller_fermat = ControllerFermat()
 app = Flask(__name__)
