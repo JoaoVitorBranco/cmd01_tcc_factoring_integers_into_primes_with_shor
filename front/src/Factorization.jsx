@@ -57,9 +57,9 @@ function Factorization() {
             value={algoritmo}
             onChange={(e) => setAlgoritmo(e.target.value)}
           >
-            <option value="shor">Shor</option>
-            <option value="fermat">Fermat</option>
-            <option value="pollard">Pollard</option>
+            <option value="shor">Shor (Quântico)</option>
+            <option value="fermat">Fermat (Clássico)</option>
+            <option value="pollard">Pollard (Clássico)</option>
           </select>
         </div>
         <button type="submit" className="custom-button" disabled={loading}>
