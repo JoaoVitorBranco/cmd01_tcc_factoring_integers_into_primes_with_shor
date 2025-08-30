@@ -21,7 +21,7 @@ function Factorization() {
     setResultado("")
     try {
       const res = await fetch(
-        `https://${API_URL}/api/factorize?number=${numero}&type_alg=${algoritmo}`
+        `${API_URL}/api/factorize?number=${numero}&type_alg=${algoritmo}`
       )
       const data = await res.json()
       let latex = ""
