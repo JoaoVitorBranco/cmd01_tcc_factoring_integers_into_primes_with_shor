@@ -9,7 +9,7 @@ from functions.order_finding_shor import OrderFindingShor
 
 
 order_finding = OrderFindingShor()
-controller = ControllerShor(order_finding=order_finding, n_times_shor=3)
+controller = ControllerShor(order_finding=order_finding, n_times_shor=1)
 controller_classical = ControllerPollard()
 controller_fermat = ControllerFermat()
 app = Flask(__name__)
@@ -25,6 +25,10 @@ def factorize():
     type_alg = request.args.get('type_alg')
     if not number:
         return jsonify({"erro": "Parâmetro 'number' é obrigatório"}), 400
+    
+    LIMIT_NUMBER  = 60
+    if not number.isdigit() or int(number) < 2 or int(number) > LIMIT_NUMBER:
+        return jsonify({"erro": f"Parâmetro 'number' deve ser um inteiro entre 2 e {LIMIT_NUMBER}"}), 400
     
     if type_alg == None or type_alg == "shor":
         result, status_code = controller(number)
