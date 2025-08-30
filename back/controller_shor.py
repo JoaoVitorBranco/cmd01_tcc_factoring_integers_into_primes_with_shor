@@ -36,39 +36,44 @@ class ControllerShor:
       print(f"Continuando com novo valor de 'a': {chute[0]}")
       return (False, chute[0]) # continuar com novo valor de 'a'
 
-    def _probabilistic_split(self, N: int, start_time=None, timeout=None) -> tuple[int, int]:
-        import time
-        if timeout is not None and start_time is not None and time.time() - start_time > timeout:
-            raise TimeoutError("Tempo limite excedido para fatoração com Shor (30s)")
-        if N % 2 == 0 or N < 3:
-            raise ValueError("N deve ser ímpar e composto, maior que 2.")
-        set_N = list(range(2,N))
-        a = random.choice(set_N)
-        print(f"Estou na escolha probabilistica. Vou testar o: a = {a} e N = {N}")
-        d = math.gcd(a, N)
-        if d > 1:
-            c = N // d
-            print(f"Escolha probabilística encontrou {d} como divisor de {N}")
-            return (d, c)
-        else:
-            try:
-                print(f"Entrando no order finding problem... rodando {self.n_times_shor} vezes")
-                for _ in range(self.n_times_shor):
-                    print(f"\nTentativa: {_ + 1}")
-                    possible_divisor, possible_new_N = self._run_order_finding(N, a)
-                    if possible_divisor != False and possible_new_N != False:
-                        return (possible_divisor, possible_new_N)
-                    elif possible_divisor == False and possible_new_N != False:
-                        a = possible_new_N
-                        print(f"Novo valor de 'a': {a}")
-                    else:
-                        print("'r' não é par, tentando novamente com novo valor de 'a'")
-                        break
-                print(f"Nenhuma das {self.n_times_shor} vezes encontrou-se um 'r' válido")
-                return False
-            except Exception as err:
-                print(f"Aconteceu uma exceção: {err}")
-                return False
+    def _probabilistic_split(self, N: int) -> tuple[int, int]:
+      """
+      Realiza a primeira etapa do algoritmo probabilístico para fatorar N.
+      N deve ser um número composto ímpar que não seja potência de primo.
+      """
+      if N % 2 == 0 or N < 3:
+        raise ValueError("N deve ser ímpar e composto, maior que 2.")
+
+      set_N = list(range(2,N))
+      a = random.choice(set_N)
+      print(f"Estou na escolha probabilistica. Vou testar o: a = {a} e N = {N}")
+      d = math.gcd(a, N) # calcula o maior divisor comum entre os 2 valores
+      if d > 1: # significa que d é um divisor de N
+        c = N // d # resultado da operação, que entrará na recursão do algorítmo principal
+        print(f"Escolha probabilística encontrou {d} como divisor de {N}")
+        return (d, c)
+      else: # realizando o cálculo da ordem r de a, onde a ^ r = 1 mod N  (order finding problem)
+        try:
+
+          print(f"Entrando no order finding problem... rodando {self.n_times_shor} vezes")
+          for _ in range(self.n_times_shor):
+            print(f"\nTentativa: {_ + 1}")
+            possible_divisor, possible_new_N = self._run_order_finding(N, a)
+            if possible_divisor != False and possible_new_N != False: 
+              return (possible_divisor, possible_new_N)
+            elif possible_divisor == False and possible_new_N != False:
+              a = possible_new_N
+              print(f"Novo valor de 'a': {a}")
+            else:
+              print("'r' não é par, tentando novamente com novo valor de 'a'")
+              break
+
+          print(f"Nenhuma das {self.n_times_shor} vezes encontrou-se um 'r' válido")
+          return False
+
+        except Exception as err:
+          print(f"Aconteceu uma exceção: {err}")
+          return False
 
     def _is_prime(self, N: int) -> bool:
       """ Teste simples de primalidade. """
@@ -94,47 +99,70 @@ class ControllerShor:
           return True, s, j
       return False, None, None
 
-    def _factorize_integers(self, N: int, start_time=None, timeout=None) -> list:
-        import time
-        if timeout is not None and start_time is not None and time.time() - start_time > timeout:
-            raise TimeoutError("Tempo limite excedido para fatoração com Shor (30s)")
-        if N <= 1:
-            return []
-        if self._is_prime(N):
-            return [N]
-        if N % 2 == 0:
-            return [2] + self._factorize_integers(N=N // 2, start_time=start_time, timeout=timeout)
-        is_power, s, j = self._is_perfect_power(N)
-        if is_power:
-            return self._factorize_integers(N=s, start_time=start_time, timeout=timeout) * j
-        split = self._probabilistic_split(N=N, start_time=start_time, timeout=timeout)
-        if split:
-            b, c = split
-            return [b] + self._factorize_integers(N=c, start_time=start_time, timeout=timeout)
-        else:
-            print("Nenhuma escolha probabilística encontrou um valor válido... buscando novo valor...")
-            return self._factorize_integers(N=N, start_time=start_time, timeout=timeout)
+    def _factorize_integers(self, N: int) -> list:
+      # Validações iniciais que nem rodam o algoritmo
+      if N <= 1:
+        return []
+      if self._is_prime(N):
+        return [N]
+
+      # Caso 1: número par
+      if N % 2 == 0:
+        return [2] + self._factorize_integers(N=N // 2)
+
+      # Caso 2: potência perfeita
+      is_power, s, j = self._is_perfect_power(N)
+      if is_power:
+        return self._factorize_integers(N=s) * j
+
+      # Caso 3: entra na análise probabilística
+      split = self._probabilistic_split(N=N)
+      if split:
+        b, c = split
+        return [b] + self._factorize_integers(N=c)
+
+      else: # não encontrou nenhum valor, voltará ao algoritmo inicial
+        print("Nenhuma escolha probabilística encontrou um valor válido... buscando novo valor...")
+        return self._factorize_integers(N=N)
 
     def __call__(self, number: str) -> tuple[any, int]:
         import time
         # Validação: é uma string numérica?
         if not isinstance(number, str) or not number.isdigit():
-            return ("O número deve ser uma string contendo apenas dígitos", 400)
+          return ("O número deve ser uma string contendo apenas dígitos", 400)
+            
+        # Conversão
         number = int(number)
+
+        # Validação de valor
         if number <= 0:
-            return ("O número deve ser positivo", 400)
+          return ("O número deve ser positivo", 400)
+
+        # Timeout setup
         start_time = time.time()
         timeout = 30
+
+        def factorize_with_timeout(N):
+          # Recursively factorize, checking timeout
+          def helper(N):
+            if time.time() - start_time > timeout:
+              raise TimeoutError("Tempo limite excedido para fatoração com Shor (30s)")
+            return self._factorize_integers(N)
+          return helper(N)
+
         try:
-            result = self._factorize_integers(N=number, start_time=start_time, timeout=timeout)
+          result = factorize_with_timeout(number)
         except TimeoutError as e:
-            return (str(e), 408)
+          return (str(e), 408)
         except Exception as e:
-            return (f"Erro inesperado: {e}", 500)
+          return (f"Erro inesperado: {e}", 500)
+
         if result is False:
-            return ("Não foi possível encontrar os primos", 404)
+          return ("Não foi possível encontrar os primos", 404)
+            
         if len(result) == 0:
-            return ("Nenhum primo encontrado", 404)
-        primes_set = set(result)
+          return ("Nenhum primo encontrado", 404)
+
+        primes_set = set(result)  
         primes_dict = {prime: result.count(prime) for prime in primes_set}
         return (primes_dict, 200)
