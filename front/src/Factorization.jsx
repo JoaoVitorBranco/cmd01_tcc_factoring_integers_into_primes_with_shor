@@ -1,15 +1,37 @@
-import { useState } from "react"
+import React, { useState } from "react"
 import "bootstrap/dist/css/bootstrap.min.css"
 import { MathJax, MathJaxContext } from "better-react-mathjax"
 import "./App.css"
 
 function Factorization() {
+  const [health, setHealth] = useState(null)
+  const [healthLoading, setHealthLoading] = useState(true)
+
+  const API_URL = import.meta.env.VITE_API_URL
+
+  // Health check effect
+  React.useEffect(() => {
+    async function checkHealth() {
+      setHealthLoading(true)
+      try {
+        const res = await fetch(`${API_URL}/`)
+        if (res.ok) {
+          setHealth("ok")
+        } else {
+          setHealth("fail")
+        }
+      } catch {
+        setHealth("fail")
+      } finally {
+        setHealthLoading(false)
+      }
+    }
+    checkHealth()
+  }, [API_URL])
   const [numero, setNumero] = useState("")
   const [resultado, setResultado] = useState("")
   const [loading, setLoading] = useState(false)
   const [algoritmo, setAlgoritmo] = useState("shor")
-
-  const API_URL = import.meta.env.VITE_API_URL
 
   const fatorar = async (e) => {
     e.preventDefault()
@@ -72,6 +94,16 @@ function Factorization() {
         </div>
       </MathJaxContext>
       {loading && <div className="loader mx-auto my-3"></div>}
+      {/* Health check at bottom */}
+      <div style={{ marginTop: 32, textAlign: "center", fontSize: "0.95rem" }}>
+        {healthLoading ? (
+          <span style={{ color: "#666" }}>Verificando backend...</span>
+        ) : health === "ok" ? (
+          <span style={{ color: "#28a745" }}>Backend online</span>
+        ) : (
+          <span style={{ color: "#dc3545" }}>Backend offline</span>
+        )}
+      </div>
     </div>
   )
 }
