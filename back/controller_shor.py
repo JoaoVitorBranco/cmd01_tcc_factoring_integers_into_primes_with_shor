@@ -125,26 +125,44 @@ class ControllerShor:
         print("Nenhuma escolha probabilística encontrou um valor válido... buscando novo valor...")
         return self._factorize_integers(N=N)
 
-    def __call__(self, number: str) -> tuple[any, int]:
-        # Validação: é uma string numérica?
-        if not isinstance(number, str) or not number.isdigit():
-            return ("O número deve ser uma string contendo apenas dígitos", 400)
+def __call__(self, number: str) -> tuple[any, int]:
+    import time
+    # Validação: é uma string numérica?
+    if not isinstance(number, str) or not number.isdigit():
+      return ("O número deve ser uma string contendo apenas dígitos", 400)
         
-        # Conversão
-        number = int(number)
+    # Conversão
+    number = int(number)
 
-        # Validação de valor
-        if number <= 0:
-            return ("O número deve ser positivo", 400)
+    # Validação de valor
+    if number <= 0:
+      return ("O número deve ser positivo", 400)
 
-        # Chamada da função de ordem
-        result = self._factorize_integers(N=number)
-        if result is False:
-            return ("Não foi possível encontrar os primos", 404)
+    # Timeout setup
+    start_time = time.time()
+    timeout = 30
+
+    def factorize_with_timeout(N):
+      # Recursively factorize, checking timeout
+      def helper(N):
+        if time.time() - start_time > timeout:
+          raise TimeoutError("Tempo limite excedido para fatoração com Shor (30s)")
+        return self._factorize_integers(N)
+      return helper(N)
+
+    try:
+      result = factorize_with_timeout(number)
+    except TimeoutError as e:
+      return (str(e), 408)
+    except Exception as e:
+      return (f"Erro inesperado: {e}", 500)
+
+    if result is False:
+      return ("Não foi possível encontrar os primos", 404)
         
-        if len(result) == 0:
-            return ("Nenhum primo encontrado", 404)
+    if len(result) == 0:
+      return ("Nenhum primo encontrado", 404)
 
-        primes_set = set(result)  
-        primes_dict = {prime: result.count(prime) for prime in primes_set}
-        return (primes_dict, 200)
+    primes_set = set(result)  
+    primes_dict = {prime: result.count(prime) for prime in primes_set}
+    return (primes_dict, 200)
