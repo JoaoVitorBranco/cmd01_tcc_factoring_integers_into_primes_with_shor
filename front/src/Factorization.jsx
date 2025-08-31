@@ -33,30 +33,38 @@ function Factorization() {
   const [loading, setLoading] = useState(false)
   const [algoritmo, setAlgoritmo] = useState("shor")
 
-  const fatorar = async (e) => {
-    e.preventDefault()
-    if (!numero || parseInt(numero) <= 1) {
-      setResultado("\\text{Informe um número maior que 1}")
+  const fatorar = async (e) => { 
+  e.preventDefault()
+  if (!numero || parseInt(numero) <= 1) {
+    setResultado("\\text{Informe um número maior que 1}")
+    return
+  }
+  setLoading(true)
+  setResultado("")
+  try {
+    const res = await fetch(
+      `${API_URL}/api/factorize?number=${numero}&type_alg=${algoritmo}`
+    )
+    const data = await res.json()
+
+    // Novo tratamento para erro da API
+    if (data.erro) {
+      setResultado("\\text{Tempo de processamento elevado...}")
       return
     }
-    setLoading(true)
-    setResultado("")
-    try {
-      const res = await fetch(
-        `${API_URL}/api/factorize?number=${numero}&type_alg=${algoritmo}`
-      )
-      const data = await res.json()
-      let latex = ""
-      for (const [f, eX] of Object.entries(data.fatores)) {
-        latex += `${f}^{${eX}} \\times `
-      }
-      setResultado(`\\text{Resultado:}\\quad ${latex.slice(0, -7)}`)
-    } catch {
-      setResultado("\\text{Erro ao consultar o backend}")
-    } finally {
-      setLoading(false)
+
+    let latex = ""
+    for (const [f, eX] of Object.entries(data.fatores)) {
+      latex += `${f}^{${eX}} \\times `
     }
+    setResultado(`\\text{Resultado:}\\quad ${latex.slice(0, -7)}`)
+  } catch {
+    setResultado("\\text{Erro ao consultar o backend}")
+  } finally {
+    setLoading(false)
   }
+}
+
 
   return (
     <div className="card">
